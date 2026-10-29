@@ -8,12 +8,14 @@ Create 3D assets from text or a selected image, recover the original task, and s
 
 ## Choose your client
 
+The versioned GitHub Release archives can be installed directly with the commands below.
+
 | Product | Install / source | Official guide |
 | --- | --- | --- |
-| MCP server | `npm install --global --ignore-scripts @quady3d/mcp@0.1.2` | [MCP setup](https://quady3d.com/integrations/mcp) |
+| MCP server | `npm install --global --ignore-scripts https://github.com/quady3dai/quady3d-tools/releases/download/v0.1.2/quady3d-mcp-0.1.2.tgz` | [MCP setup](https://quady3d.com/integrations/mcp) |
 | Agent Skill | [`skills/quady3d`](skills/quady3d) | [Skill setup](https://quady3d.com/integrations/agent-skill) |
-| TypeScript / JavaScript SDK | `npm install --ignore-scripts @quady3d/sdk@0.1.2` | [TypeScript SDK](https://quady3d.com/developers/sdk/typescript) |
-| Python SDK | `python -m pip install quady3d==0.1.2` | [Python SDK](https://quady3d.com/developers/sdk/python) |
+| TypeScript / JavaScript SDK | `npm install --ignore-scripts https://github.com/quady3dai/quady3d-tools/releases/download/v0.1.2/quady3d-sdk-0.1.2.tgz` | [TypeScript SDK](https://quady3d.com/developers/sdk/typescript) |
+| Python SDK | `python -m pip install https://github.com/quady3dai/quady3d-tools/releases/download/v0.1.2/quady3d-0.1.2-py3-none-any.whl` | [Python SDK](https://quady3d.com/developers/sdk/python) |
 
 Versioned downloads and checksums: [GitHub Releases](https://github.com/quady3dai/quady3d-tools/releases) and [Quady3D downloads](https://quady3d.com/developers#downloads).
 
