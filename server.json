@@ -1,0 +1,46 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.quady3dai/mcp",
+  "title": "Quady3D MCP",
+  "description": "Generate 3D assets, quote credits, recover tasks and save model files to a project.",
+  "version": "0.1.2",
+  "websiteUrl": "https://quady3d.com/integrations/mcp",
+  "repository": {
+    "url": "https://github.com/quady3dai/quady3d-tools",
+    "source": "github",
+    "subfolder": "packages/mcp"
+  },
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/quady3dai/quady3d-tools/main/assets/quady3d-logo.png",
+      "mimeType": "image/png",
+      "sizes": ["512x512"]
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@quady3d/mcp",
+      "version": "0.1.2",
+      "runtimeHint": "npx",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "QUADY3D_API_KEY",
+          "description": "Create a limited key at https://quady3d.com/account?section=connections. Generation uses account credits; model downloads require download access. Store the key in the MCP host environment, never in chat.",
+          "format": "string",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "QUADY3D_ALLOWED_ROOTS",
+          "description": "JSON array of existing absolute project directories that the server may read and write. Limit access to the project folders you choose.",
+          "format": "string",
+          "isRequired": true,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

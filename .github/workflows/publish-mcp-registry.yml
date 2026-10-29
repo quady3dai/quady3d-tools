@@ -1,0 +1,83 @@
+name: Publish MCP Registry metadata
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mcp-registry-0.1.2
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'quady3dai/quady3d-tools' && github.ref == 'refs/heads/main' && github.actor == 'quady3d'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      MCP_PUBLISHER_VERSION: v1.8.6
+      REGISTRY_VERSION_URL: https://registry.modelcontextprotocol.io/v0.1/servers/io.github.quady3dai%2Fmcp/versions/0.1.2
+    steps:
+      - name: Check out public metadata
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Install signature verifier
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Download and verify official publisher
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive=mcp-publisher_linux_amd64.tar.gz
+          base_url="https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}"
+          curl --fail --location --silent --show-error --max-time 60 --output "$archive" "$base_url/$archive"
+          curl --fail --location --silent --show-error --max-time 60 --output "$archive.sigstore.json" "$base_url/$archive.sigstore.json"
+          echo "1fbe93fc0783c2394d8012c8d6e50a59e98cb2cc2d216264cc69f405d0e21340  $archive" | sha256sum --check
+          cosign verify-blob \
+            --bundle "$archive.sigstore.json" \
+            --certificate-identity "https://github.com/modelcontextprotocol/registry/.github/workflows/release.yml@refs/tags/${MCP_PUBLISHER_VERSION}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "$archive"
+          tar xzf "$archive" mcp-publisher
+          ./mcp-publisher validate server.json
+
+      - name: Check for an existing immutable version
+        id: existing
+        shell: bash
+        run: |
+          set -euo pipefail
+          status=$(curl --silent --show-error --max-time 30 --output /tmp/registry-before.json --write-out '%{http_code}' "$REGISTRY_VERSION_URL")
+          case "$status" in
+            200)
+              jq -e --slurpfile expected server.json '.server.name == $expected[0].name and .server.version == $expected[0].version and .server.packages == $expected[0].packages and .server.websiteUrl == $expected[0].websiteUrl' /tmp/registry-before.json
+              echo 'exists=true' >> "$GITHUB_OUTPUT"
+              ;;
+            404) echo 'exists=false' >> "$GITHUB_OUTPUT" ;;
+            *) echo "Registry lookup failed with HTTP $status; no publication attempted."; exit 1 ;;
+          esac
+
+      - name: Authenticate with short-lived GitHub identity
+        if: steps.existing.outputs.exists == 'false'
+        run: ./mcp-publisher login github-oidc --registry=https://registry.modelcontextprotocol.io
+
+      - name: Publish existing npm package metadata
+        if: steps.existing.outputs.exists == 'false'
+        run: ./mcp-publisher publish server.json
+
+      - name: Verify public registry entry
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --max-time 30 "$REGISTRY_VERSION_URL" --output /tmp/registry-after.json
+          jq -e --slurpfile expected server.json '.server.name == $expected[0].name and .server.version == $expected[0].version and .server.packages == $expected[0].packages and .server.websiteUrl == $expected[0].websiteUrl' /tmp/registry-after.json
+          {
+            echo '### Quady3D MCP Registry'
+            echo 'Version: 0.1.2. Existing npm package; no npm upload or model generation.'
+            echo '[Public registry metadata](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.quady3dai%2Fmcp/versions/0.1.2)'
+            echo '[Installation and documentation](https://quady3d.com/integrations/mcp)'
+          } >> "$GITHUB_STEP_SUMMARY"

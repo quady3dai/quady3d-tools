@@ -1,0 +1,4 @@
+# The image installs the released npm package and needs no local source or secrets.
+**
+!Dockerfile
+!.dockerignore
