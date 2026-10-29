@@ -37,8 +37,7 @@
           "name": "QUADY3D_ALLOWED_ROOTS",
           "description": "JSON array of existing absolute project directories that the server may read and write. Limit access to the project folders you choose.",
           "format": "string",
-          "isRequired": true,
-          "isSecret": false
+          "isRequired": true
         }
       ]
     }
