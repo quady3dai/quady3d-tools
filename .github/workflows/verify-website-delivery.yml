@@ -1,0 +1,50 @@
+name: Verify public website downloads
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Verify versioned downloads and public API boundaries
+        run: |
+          python3 - <<'PY'
+          import datetime, hashlib, json, os, urllib.request, urllib.error
+          expected = json.loads('[{"url":"https://quady3d.com/downloads/quady3d/0.1.1/quady3d-mcp-0.1.1.tgz","bytes":377100,"sha256":"d09ca8691d0e3d7d94c782f2301ab296739f9e088204dfb3900f08393cd2cb02"},{"url":"https://quady3d.com/downloads/quady3d/0.1.1/quady3d-skill-0.1.1.zip","bytes":6304,"sha256":"ddc3574807a729802584b21908e4ffa0540271d2ef2765d3a8e1f154cf8703ac"},{"url":"https://quady3d.com/downloads/quady3d/0.1.1/quady3d-sdk-0.1.1.tgz","bytes":7883,"sha256":"8bf192d4c081bce159c87579c43f1b21d1c18e06bffbaed9ca80ea051d736431"},{"url":"https://quady3d.com/downloads/quady3d/0.1.1/quady3d-0.1.1-py3-none-any.whl","bytes":7950,"sha256":"b217081c9c0d16952a68d181edbe2f4bc420bd50ad7681be7be17fb3051a5c18"},{"url":"https://quady3d.com/downloads/quady3d/0.1.1/quady3d-0.1.1.tar.gz","bytes":6941,"sha256":"b238bf06ec89c25abec90d4841a46ddb063b8853ae69abe9b039fc6b19a495f0"},{"url":"https://quady3d.com/downloads/quady3d/0.1.1/quady3d-clients-0.1.1.zip","bytes":58115,"sha256":"beb1687122f52f3bfe102b3fbc982965f8b1962cfb9c59389ed1b27257c1cb14"},{"url":"https://quady3d.com/downloads/quady3d/0.1.2/quady3d-mcp-0.1.2.tgz","bytes":377645,"sha256":"820e1a45897cece0e96ab71f19948a4ee686af2e634cd916f217cb84ca9809f8"},{"url":"https://quady3d.com/downloads/quady3d/0.1.2/quady3d-sdk-0.1.2.tgz","bytes":7957,"sha256":"0901d1aa6279469d5220730ae40c2298384b7014855a31f9522564b22c817a95"},{"url":"https://quady3d.com/downloads/quady3d/0.1.2/quady3d-0.1.2-py3-none-any.whl","bytes":8008,"sha256":"e20216949f8339009be2cb197bcbf0427fabc409b5548c0724617a2cd499c647"},{"url":"https://quady3d.com/downloads/quady3d/0.1.2/quady3d-0.1.2.tar.gz","bytes":7049,"sha256":"214d82baaafe1d17aef6be47b8c60221e2aa8166a8d13145fb17df640a284210"},{"url":"https://quady3d.com/downloads/quady3d/0.1.2/quady3d-skill-0.1.2.zip","bytes":117232,"sha256":"406fccb26e59cc7fa694269dad22a7a07c5af0abae12d747be40d1aac6633e84"},{"url":"https://quady3d.com/downloads/quady3d/0.1.2/quady3d-clients-0.1.2.zip","bytes":286048,"sha256":"a990f9271b01f2b04e98e5e5603ea1e3b7bfb179a774b4421a0fc4f5cc5c0e39"}]')
+          report = {"checked_at": datetime.datetime.now(datetime.timezone.utc).isoformat(), "transport": "GitHub-hosted Ubuntu HTTPS, certificate validation enabled", "files": [], "api_and_private_boundaries": [], "real_supplier_tasks": 0, "new_spend_usd": 0}
+          for item in expected:
+              result = dict(item)
+              try:
+                  with urllib.request.urlopen(item["url"], timeout=25) as response:
+                      body = response.read(item["bytes"] + 1)
+                      result.update(status=response.status, cache_control=response.headers.get("Cache-Control"))
+                  result["actual_sha256"] = hashlib.sha256(body).hexdigest()
+                  result["passed"] = len(body) == item["bytes"] and result["actual_sha256"] == item["sha256"]
+              except Exception as error:
+                  result.update(passed=False, error=type(error).__name__ + ": " + str(error))
+              report["files"].append(result)
+              print("Download", item["url"], "PASS" if result["passed"] else "FAIL", flush=True)
+          for path, expected_status in [("/api/v1/models", 401), ("/api/developer-preview/artifacts/advanced-mcp", 404), ("/api/developer-preview/artifacts/mcp", 404)]:
+              try:
+                  with urllib.request.urlopen("https://quady3d.com" + path, timeout=25) as response:
+                      status = response.status
+              except urllib.error.HTTPError as error:
+                  status = error.code
+                  error.close()
+              report["api_and_private_boundaries"].append({"path": path, "status": status, "passed": status == expected_status})
+          with urllib.request.urlopen("https://quady3d.com/downloads/quady3d/0.1.2/release.json", timeout=25) as response:
+              body = response.read(32769)
+          report["manifest_exact_match"] = hashlib.sha256(body).hexdigest() == "cefc9f0b85a1de26cae2b723a52e290c71fbd8a6ae67bdfc78b994b806a60f87"
+          with urllib.request.urlopen("https://quady3d.com/developers/docs/clients.md", timeout=25) as response:
+              body = response.read(128 * 1024 + 1).decode()
+          report["client_text_document_installation_commands"] = all(item in body for item in ["@quady3d/mcp@0.1.2", "@quady3d/sdk@0.1.2", "quady3d==0.1.2", "quady3dai/quady3d-tools"])
+          passed = all(item["passed"] for item in report["files"] + report["api_and_private_boundaries"]) and report["manifest_exact_match"] and report["client_text_document_installation_commands"]
+          report["status"] = "passed" if passed else "failed"
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write("# Quady3D public delivery verification\n\n[Developer API and downloads](https://quady3d.com/developers#downloads) · [MCP](https://quady3d.com/integrations/mcp) · [Python SDK](https://quady3d.com/developers/sdk/python)\n\n")
+              summary.write("Result: **" + report["status"] + "**. Verified " + str(sum(item["passed"] for item in report["files"])) + "/12 downloads. No model generations.\n")
+          print("QUADY3D_DELIVERY_VERIFICATION=" + json.dumps(report, separators=(",", ":")))
+          assert passed, "Public delivery verification failed"
+          PY
