@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quady3d"
+version = "0.1.2"
+description = "Official Python client for Quady3D asset generation, task recovery and downloads"
+requires-python = ">=3.10"
+readme = "README.md"
+authors = [{ name = "Quady3D AI", email = "support@quady3d.com" }]
+license = "MIT"
+license-files = ["LICENSE", "NOTICE.txt"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+quady3d = ["py.typed"]
+
+[project.urls]
+Homepage = "https://quady3d.com/developers/sdk/python"
+Documentation = "https://quady3d.com/developers/docs"
+Source = "https://github.com/quady3dai/quady3d-tools"
+Issues = "https://github.com/quady3dai/quady3d-tools/issues"
+Changelog = "https://github.com/quady3dai/quady3d-tools/blob/main/CHANGELOG.md"

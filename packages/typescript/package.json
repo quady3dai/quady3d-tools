@@ -1,0 +1,47 @@
+{
+  "name": "@quady3d/sdk",
+  "version": "0.1.2",
+  "private": false,
+  "type": "module",
+  "description": "Quady3D client foundation for MCP, plugins and server applications",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
+  "files": [
+    "src/index.js",
+    "src/index.d.ts",
+    "README.md",
+    "NOTICE.txt",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "author": "Quady3D AI",
+  "license": "MIT",
+  "homepage": "https://quady3d.com/developers/sdk/typescript",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quady3dai/quady3d-tools.git",
+    "directory": "packages/typescript"
+  },
+  "bugs": {
+    "url": "https://github.com/quady3dai/quady3d-tools/issues"
+  },
+  "keywords": [
+    "quady3d",
+    "3d",
+    "text-to-3d",
+    "image-to-3d",
+    "game-assets",
+    "sdk",
+    "typescript",
+    "javascript"
+  ]
+}

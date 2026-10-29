@@ -1,0 +1,2 @@
+Copyright (c) 2026 Quady3D AI. Licensed under the MIT License.
+This client license does not cover the Quady3D service, models or generated assets.

@@ -1,0 +1,13 @@
+node_modules/
+packages/mcp/dist/
+dist/
+**/__pycache__/
+**/*.egg-info/
+**/build/
+.venv/
+.env
+.env.*
+.npmrc
+.pypirc
+*.log
+.DS_Store

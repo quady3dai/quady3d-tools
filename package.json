@@ -1,0 +1,9 @@
+{
+  "name": "quady3d-clients-source",
+  "private": true,
+  "packageManager": "pnpm@10.16.1",
+  "devDependencies": {
+    "@types/node": "22.18.0",
+    "typescript": "5.9.3"
+  }
+}

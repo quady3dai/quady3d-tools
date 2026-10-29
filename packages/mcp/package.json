@@ -1,0 +1,59 @@
+{
+  "name": "@quady3d/mcp",
+  "version": "0.1.2",
+  "private": false,
+  "type": "module",
+  "description": "Quady3D tools for local AI agents: generate, resume and save 3D assets",
+  "author": "Quady3D AI",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "quady3d-mcp": "dist/cli.mjs"
+  },
+  "exports": {
+    ".": "./dist/index.mjs"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "src",
+    "build.mjs",
+    "tsconfig.json"
+  ],
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/server": "2.3.1",
+    "@modelcontextprotocol/client": "2.3.1",
+    "@quady3d/sdk": "workspace:*",
+    "esbuild": "0.28.1",
+    "zod": "4.6.5"
+  },
+  "homepage": "https://quady3d.com/integrations/mcp",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quady3dai/quady3d-tools.git",
+    "directory": "packages/mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/quady3dai/quady3d-tools/issues"
+  },
+  "keywords": [
+    "quady3d",
+    "3d",
+    "text-to-3d",
+    "image-to-3d",
+    "game-assets",
+    "mcp",
+    "model-context-protocol"
+  ],
+  "mcpName": "io.github.quady3dai/mcp"
+}

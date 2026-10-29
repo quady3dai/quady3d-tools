@@ -1,0 +1,28 @@
+name: Publish Python SDK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Download the verified release artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download v0.1.2 --repo quady3dai/quady3d-tools --dir dist \
+            --pattern quady3d-0.1.2-py3-none-any.whl \
+            --pattern quady3d-0.1.2.tar.gz --pattern SHA256SUMS.txt
+          cd dist
+          sha256sum --check --ignore-missing SHA256SUMS.txt
+          rm SHA256SUMS.txt
+      - name: Publish with PyPI trusted publishing
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086
